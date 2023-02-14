@@ -116,14 +116,15 @@ class Tic:
         self.XvX_list = ['j1', "name1", 'j2', "name2", 'C0', 'C1', 'C2', "CPU1 Easy", "CPU1 Hard", "CPU2 Easy", "CPU2 Hard"]
         
         self.ls = [1, 3, 5, 1, 11 , 111]
-        self.inText = [sg.Text("Manual input:", font=("Helvetica",20), key ='MI', expand_x=True),sg.In(key="-IN-",focus=True,  size=(28)),sg.Button("GO",bind_return_key=True)]
-        self.Best_Text = [sg.Text("Best of", font=("Helvetica",35), key = "head")]
-        self.Best_Text1 = [sg.Text("Best of", font=("Helvetica",35), key = "head1")]
+        self.inText = [sg.Text("Manual input:", font=("Helvetica",20), key ='MI', expand_x=True),sg.In(key="-IN-",focus=True,  size=(28)),sg.Button("GO",bind_return_key=True,focus=True)]
+        self.Best_Text = sg.Push(),sg.Text("Best of", font=("Helvetica",35), key = "head", justification='center'),sg.Push()
+        self.Best_Text1 = sg.Push(),sg.Text("Best of", font=("Helvetica",35), key = "head1", justification='center'),sg.Push()
         self.button_small_num = [[sg.Button(f'{num}', key=str(num)+'small', size=(15,1), font=("Helvetica",35))]for num in self.ls[0:3]]
         self.button_big_num = [[sg.Button(f'{num}', key=str(num)+'big', size=(15,1), font=("Helvetica",35))]for num in self.ls[3:6]]
-        self.button_back = [sg.Button("Back",size=(10), font=("Helvetica",20), key = "bc")]
-        self.button_back1 = [sg.Button("Back",size=(10), font=("Helvetica",20), key = "bk")]
-        Visi_button_CPU = [sg.Button("Visulisation off", key = "off", font=("Helvetica",20))]
+        self.button_back = sg.Push(),sg.Button("Back",size=(10), font=("Helvetica",20),expand_x=True, key = "bc"),sg.Push()
+        button_back1 = sg.Button("Back",size=(10), font=("Helvetica",20), key = "bk")
+        Visi_button_CPU = sg.Button("Visulisation on/off", key = "off", font=("Helvetica",20), tooltip = "On by default")
+        last_row_buttons_cpu = [sg.Push(),button_back1, Visi_button_CPU,sg.Push()]
 
         self.layout_START = [self.button_mode(f'{mode}') for mode in self.modes]
         self.layout_XvX =    [self.player1+self.cPU1, 
@@ -139,8 +140,7 @@ class Tic:
         self.layout_BOF_big = [self.Best_Text1]
         self.layout_BOF_big += self.button_big_num
         self.layout_BOF_big.append(self.inText)
-        self.layout_BOF_big.append(self.button_back1)
-        self.layout_BOF_big.append(Visi_button_CPU)
+        self.layout_BOF_big.append(last_row_buttons_cpu)
 
         letters_display = ['a', 'b', 'c']
         l5 = ['1', '2', '3']
@@ -153,14 +153,16 @@ class Tic:
         self.layout_game.append([sg.T(text1_game, font=("Helvetica",20), key = "game1")])
         self.layout_game.append([sg.T(text2_game, font=("Helvetica",20), key = "game2")])
     
-        Next_button_CPU = [sg.Button("Next", key = "Next",size=(7), font=("Helvetica",25))]
+        Next_button_CPU = sg.Button("Next", key = "Next",size=(7), font=("Helvetica",25))
+        Visi_off_CPU = sg.Button("Visualisation off", key = "offf",size=(13), font=("Helvetica",25))
+        line_cpu = sg.Push(),Next_button_CPU,Visi_off_CPU,sg.Push()
         names_CPU_1 = [sg.T('', font=("Helvetica",10), key = "NC1")]
         names_CPU_2 = [sg.T('', font=("Helvetica",10), key = "NC2")]
         
         self.layout_game_CPU = [[sg.Button('',size =(5,1), font=("Helvetica", 40), disabled_button_color = ("white"), key = x+y, disabled=True)for x in l5] for y in letters_display]
         self.layout_game_CPU.append(names_CPU_1)
         self.layout_game_CPU.append(names_CPU_2)
-        self.layout_game_CPU.append(Next_button_CPU)
+        self.layout_game_CPU.append(line_cpu)
 
         self.text1_continue = self.jugador1Name + ": " + str(self.jugador1Points)
         self.text2_continue = self.jugador2Name + ": " + str(self.jugador2Points)
@@ -183,7 +185,7 @@ class Tic:
         self.layout_end = [
                         [sg.T(text_end,justification='center', font=("Helvetica",35), key = 'txt_end')],
                         [sg.T('', font=("Helvetica",35), key= "320")],
-                        [sg.T(self.winner, font=("Helvetica",20), key = 'winner', justification= 'center')],
+                        [sg.Push(),sg.T(self.winner, font=("Helvetica",20), key = 'winner', justification= 'center'),sg.Push()],
                         [exit_button]
                       ]
 
@@ -198,8 +200,10 @@ class Tic:
 
 
         self.layout = [[layout1, layout2, layout3, layout3_5,layout4, layout4_5, layout5, layout6]]
-        self.window = sg.Window('Tic-Tac-Toe', self.layout,margins=(300, 150), element_justification='center', finalize=True)
+        self.window = sg.Window('Tic-Tac-Toe', self.layout,margins=(300, 300), element_justification='center', finalize=True)
         self.window.maximize()
+
+        self.memwinner =[]
     def clear(self) -> None:
         
         self.a1 = '-'
@@ -253,6 +257,8 @@ class Tic:
         self.mem5 = []  
 
         self.tat = 0
+
+        self.window['off'].set_tooltip('On by default')  
     def clear_board(self) -> None:     
         lista = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
         lsi = ['1a', '2a', '3a', '1b', '2b', '3b', '1c', '2c', '3c']
@@ -271,7 +277,6 @@ class Tic:
 
         return self.mems[0:i+1]  
     def text(self) -> None:
-
         dir_path = Path.cwd().joinpath(r"Tateti scores")
         file_name = self.jugador1Name + " vs " + self.jugador2Name + '.txt'
         file_path = dir_path.joinpath(file_name)
@@ -290,26 +295,34 @@ class Tic:
                     if len(ls) != 0:
                         f.write("\n")
                         for x in ls:
-                            f.write(x[0:3][0]+x[0:3][1]+x[0:3][2]+'\t\t')
+                            f.write(x[0:3][0]+x[0:3][1]+x[0:3][2]+'\t\t\t')
                         f.write('\n')
                         for x in ls:
-                            f.write(x[3:6][0]+x[3:6][1]+x[3:6][2]+'\t\t')
+                            f.write(x[3:6][0]+x[3:6][1]+x[3:6][2]+'\t\t\t')
                         f.write('\n')
                         for x in ls:
-                            f.write(x[6:9][0]+x[6:9][1]+x[6:9][2]+'\t\t')
+                            f.write(x[6:9][0]+x[6:9][1]+x[6:9][2]+'\t\t\t')
+                        f.write('\n')
+                        for x in self.memwinner:
+                            f.write(f'{x}\t')
+                        f.write('\n')
             else:
                 with open (dir_path.joinpath(file_name),'w') as f:  
                     f.write('\n' + self.jugador1Name + ": " + str(self.jugador1Points) + '\t|\t' + self.jugador2Name + ": " + str(self.jugador2Points)+ "\t|" + self.textoganador)
                     if len(ls) != 0:
                         f.write("\n")
                         for x in ls:
-                            f.write(x[0:3][0]+x[0:3][1]+x[0:3][2]+'\t\t')
+                            f.write(x[0:3][0]+x[0:3][1]+x[0:3][2]+'\t\t\t')
                         f.write('\n')
                         for x in ls:
-                            f.write(x[3:6][0]+x[3:6][1]+x[3:6][2]+'\t\t')
+                            f.write(x[3:6][0]+x[3:6][1]+x[3:6][2]+'\t\t\t')
                         f.write('\n')
                         for x in ls:
-                            f.write(x[6:9][0]+x[6:9][1]+x[6:9][2]+'\t\t')
+                            f.write(x[6:9][0]+x[6:9][1]+x[6:9][2]+'\t\t\t')
+                        f.write('\n')
+                        for x in self.memwinner:
+                            f.write(f'{x}\t')
+                        f.write('\n')
                         print('File was created.')
     def analisis(self) -> bool:
         #Mira todas linea de 3 en la escuadra y busca si hay 3 iguales
@@ -449,7 +462,12 @@ class Tic:
         else:   
             if self.turno1v1 == self.jugador1Name:
                 self.jugador1Points += 1.0
-            else: self.jugador2Points += 1.0
+                if len(self.memwinner) <5:
+                    self.memwinner.append(self.jugador1Name)
+            else:
+                self.jugador2Points += 1.0
+                if len(self.memwinner) <5:                    
+                    self.memwinner.append(self.jugador2Name)
 
             out = 0
             for MEM in self.mems:
@@ -464,6 +482,7 @@ class Tic:
                     MEM.append(self.c2)
                     MEM.append(self.c3)
                     out = 1
+            
         return
     def finish(self) -> None:
         # quien gano depende de quien tenga mas puntos caundo se la llama
@@ -761,8 +780,13 @@ class Tic:
                 
         while True:
             event, values = self.window.read()
-            if event in help:         
-                self.Bof(int(event[0]))
+            if event in help:
+                i=0
+                num =''
+                while event[i] in '135':                   
+                    num += event[i]
+                    i += 1
+                self.Bof(int(num))
                 break    
             if event == "bc" or event == "bk":
                 self.window['-COL3.5-'].update(visible=False)
@@ -776,7 +800,12 @@ class Tic:
                 else: 
                     self.Bof(int(values['-IN-']))         
             if event == 'off':
-                self.visi = 0       
+                if self.visi == 0:
+                   self.visi = 1
+                   self.window['off'].set_tooltip('ON')  
+                else:
+                    self.visi = 0    
+                    self.window['off'].set_tooltip('OFF')   
             if event == sg.WIN_CLOSED:
                 self.EXIT = 1
                 break        
@@ -883,6 +912,13 @@ class Tic:
                 self.EXIT = 1
             if event == "Next":
                 break
+            if event == 'offf':
+                if self.visi == 0:
+                   self.visi = 1
+                   self.window['offf'].set_tooltip('ON')  
+                else:
+                    self.visi = 0    
+                    self.window['offf'].set_tooltip('OFF')   
     def __repr__(self) -> str:
         
         print(' ', '1','2','3')
