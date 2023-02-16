@@ -67,15 +67,6 @@ class Tic:
 
         self.dicNumToLinea:dict[list] = {0:self.FILa, 1:self.FILb, 2:self.FILc, 3:self.COL1, 4:self.COL2, 5:self.COL3, 6:self.DIAG1, 7:self.DIAG2}
 
-        self.double1:list[str] = ['a1', 'a2', 'a3', 'b3', 'c3']
-        self.double2:list[str] = ['a1', 'b1', 'c1', 'c2', 'c3']
-        self.double3:list[str] = ['c1', 'b1', 'a1', 'a2', 'a3']
-        self.double4:list[str] = ['c1', 'c2', 'c3', 'b3', 'a3']
-        self.DOUBLE1:list[self.str] = [self.a1, self.a2, self.a3, self.b3, self.c3]
-        self.DOUBLE2:list[self.str] = [self.a1, self.b1, self.c1, self.c2, self.c3]
-        self.DOUBLE3:list[self.str] = [self.c1, self.b1, self.a1, self.a2, self.a3]
-        self.DOUBLE4:list[self.str] = [self.c1, self.c2, self.c3, self.b3, self.a3]
-
         self.cpu_center:int = 0
         self.visi:bool = 1
         self.textoganador:str = 'ERROR'
@@ -182,11 +173,13 @@ class Tic:
             text_end = 'Empate'
         else: text_end = 'Ganador:'
         exit_button = sg.Button("Exit", expand_x=True, font=("Helvetica",20), key= 'Exit')
+        again_button = sg.Button("Volver a jugar?", expand_x=True, font=("Helvetica",20), key= 'Again')
         self.layout_end = [
                         [sg.T(text_end,justification='center', font=("Helvetica",35), key = 'txt_end')],
                         [sg.T('', font=("Helvetica",35), key= "320")],
                         [sg.Push(),sg.T(self.winner, font=("Helvetica",20), key = 'winner', justification= 'center'),sg.Push()],
-                        [exit_button]
+                        [exit_button],
+                        [again_button]
                       ]
 
         layout1 = sg.Column(self.layout_START, key='-COL1-')
@@ -201,7 +194,7 @@ class Tic:
 
         self.layout = [[layout1, layout2, layout3, layout3_5,layout4, layout4_5, layout5, layout6]]
         self.window = sg.Window('Tic-Tac-Toe', self.layout,margins=(300, 300), element_justification='center', finalize=True)
-        self.window.maximize()
+        # self.window.maximize()
 
         self.memwinner =[]
     def clear(self) -> None:
@@ -241,11 +234,6 @@ class Tic:
 
         self.corners =  ['a1','a3','c1','c3']
 
-        self.double1 = ['a1', 'a2', 'a3', 'b3', 'c3']
-        self.double2 = ['a1', 'b1', 'c1', 'c2', 'c3']
-        self.DOUBLE1 = [self.a1, self.a2, self.a3, self.b3, self.c3]
-        self.DOUBLE2 = [self.a1, self.b1, self.c1, self.c2, self.c3]
-
         self.cpu_center = 0
 
         self.textoganador = 'ERROR'
@@ -258,7 +246,7 @@ class Tic:
 
         self.tat = 0
 
-        self.window['off'].set_tooltip('On by default')  
+        self.window['off'].set_tooltip('On by default') 
     def clear_board(self) -> None:     
         lista = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
         lsi = ['1a', '2a', '3a', '1b', '2b', '3b', '1c', '2c', '3c']
@@ -349,16 +337,22 @@ class Tic:
         #Aumenta el counter de cantidad de moviminetos
         #llama a cambiar_turno()
         if self.EXIT == 0:
-            
+            if choice == 'ERROR':
+                print(self.counter,"ROTO")
+                print(self)
+                self.clear()
+                return
+
             if self.mode == 'PvCPU':
                 self.window[choice].update(self.turno)
-            if self.mode == 'CPUvCPU':
+            if self.mode == 'CPUvCPU' and self.visi == 1:
                 swap = choice[1] + choice[0]
                 self.window[swap].update(self.turno)
 
             if choice in self.disponibles:
                 self.disponibles.remove(choice)
             else:
+                print(type(choice))
                 print("Rompiste algo")
                 pass
             self.counter += 1
@@ -368,32 +362,22 @@ class Tic:
                 self.fila[0] = self.turno
                 self.col1[0] = self.turno
                 self.diag1[0] = self.turno
-                self.DOUBLE1[0] = self.turno
-                self.DOUBLE2[0] = self.turno
-                self.DOUBLE3[2] = self.turno
 
             elif choice == 'a2':
                 self.a2 = self.turno
                 self.fila[1] = self.turno
                 self.col2[0] = self.turno
-                self.DOUBLE1[1] = self.turno
-                self.DOUBLE3[3] = self.turno
 
             elif choice == 'a3':
                 self.a3 = self.turno
                 self.fila[2] = self.turno
                 self.col3[0] = self.turno
                 self.diag2[0] = self.turno
-                self.DOUBLE1[2] = self.turno
-                self.DOUBLE3[4] = self.turno
-                self.DOUBLE4[4] = self.turno
 
             elif choice == 'b1':
                 self.b1 = self.turno
                 self.filb[0] = self.turno
                 self.col1[1] = self.turno
-                self.DOUBLE2[1] = self.turno
-                self.DOUBLE3[1] = self.turno
 
             elif choice == 'b2':
                 self.b2 = self.turno
@@ -406,33 +390,23 @@ class Tic:
                 self.b3 = self.turno
                 self.filb[2] = self.turno
                 self.col3[1] = self.turno
-                self.DOUBLE1[3] = self.turno
-                self.DOUBLE4[3] = self.turno
 
             elif choice == 'c1':
                 self.c1 = self.turno
                 self.filc[0] = self.turno
                 self.col1[2] = self.turno
                 self.diag2[2] = self.turno
-                self.DOUBLE2[2] = self.turno
-                self.DOUBLE3[0] = self.turno
-                self.DOUBLE4[0] = self.turno
 
             elif choice == 'c2':
                 self.c2 = self.turno
                 self.filc[1] = self.turno
                 self.col2[2] = self.turno
-                self.DOUBLE2[2] = self.turno
-                self.DOUBLE4[1] = self.turno
 
             elif choice == 'c3':
                 self.c3 = self.turno
                 self.filc[2] = self.turno
                 self.col3[2] = self.turno
                 self.diag1[2] = self.turno
-                self.DOUBLE1[4] = self.turno
-                self.DOUBLE2[4] = self.turno
-                self.DOUBLE4[3] = self.turno
 
             self.cambiar_turno()
 
@@ -464,6 +438,9 @@ class Tic:
                 self.jugador1Points += 1.0
                 if len(self.memwinner) <5:
                     self.memwinner.append(self.jugador1Name)
+                if self.jugador1Name == "CPU 1 Easy":
+                    print("llora")
+                    print(self)
             else:
                 self.jugador2Points += 1.0
                 if len(self.memwinner) <5:                    
@@ -515,6 +492,20 @@ class Tic:
             if event == "Exit":
                 self.text()
                 self.window.close()
+            if event == 'Again':
+                self.text()
+                self.clear()
+                self.clear_board()
+                self.window['-COL6-'].update(visible=False)
+                self.window['-COL1-'].update(visible=True)
+                self.jugador1Name= '---'
+                self.jugador2Name= '---'
+                self.jugador1Points= 0
+                self.jugador2Points= 0
+                self.mode = '' 
+                self.visi =1
+
+                self.Empezar()
             break
     def seguir(self, cantidad:int) -> None:
         if self.EXIT == 0:
@@ -544,8 +535,9 @@ class Tic:
                     self.last_screen()
                 break          
     def easySelect(self) -> None:
-
         choice:str = random.choice(self.disponibles)
+        if choice in self.corners:
+            self.corners.remove(choice)
         self.assign(choice)
     def ezwin(self) -> bool:
         #busca si hay un movimiento que gana y lo juega
@@ -580,51 +572,88 @@ class Tic:
         if len(defend) != 0: #para generar preferencia
                 self.assign(defend[0])
                 return False
-        return self.double_trouble()
-    def double_trouble(self) -> bool:
-
+        return True
+    def double_trouble(self) -> bool:         
     # Busca si hay un moviemto que genere dos mov distintos que ganen en el proximo turno y lo juega
     # Esto esta limitado a los posibles que pueden generar el AI, hay otros que no va a ver pero nunca estaria en 
     # una posicion para que pasen
     # Esto es para defender y atacar
-        
-        count_x_double_1:int = 0
-        count_x_double_2:int = 0
-        count_x_double_3:int = 0
-        count_x_double_4:int = 0
 
-        for coord in self.DOUBLE1:
-            if coord == 'x':
-                count_x_double_1 += 1
-        for coord in self.DOUBLE2:
-            if coord == 'x':
-                count_x_double_2 += 1
-        for coord in self.DOUBLE3:
-            if coord == 'x':
-                count_x_double_1 += 1
-        for coord in self.DOUBLE4:
-            if coord == 'x':
-                count_x_double_2 += 1
+        if self.counter == 3:
+            if len(set(self.diag1)) == 2 and '-' not in self.diag1 or len(set(self.diag2)) == 2 and '-' not in self.diag2:
+                if self.b2 == 'o':
+                    self.assign(random.choice(list(set(self.disponibles)-set(self.corners))))
+                else:  
+                    self.assign(random.choice(list(set(self.disponibles)&set(self.corners))))
+                return False
+            
+        turn =  'x'
+        if self.turno == 'x':
+            turn = 'o'
 
-        if count_x_double_1 == 2 and len(set(self.DOUBLE1)) == 2 and '-' in self.DOUBLE1:
-            choice:str = list(set(self.disponibles) & set(self.double1))
-            self.assign(random.choice(choice))
-            return False
+        for posible in self.disponibles:
+            #Crea sistema paralelo
+            TEMPfila:list[self.str] = [self.a1, self.a2, self.a3]
+            TEMPfilb:list[self.str] = [self.b1, self.b2, self.b3]
+            TEMPfilc:list[self.str] = [self.c1, self.c2, self.c3]
+            TEMPcol1:list[self.str] = [self.a1, self.b1, self.c1]
+            TEMPcol2:list[self.str] = [self.a2, self.b2, self.c2]
+            TEMPcol3:list[self.str] = [self.a3, self.b3, self.c3]
+            TEMPdiag1:list[self.str] = [self.a1, self.b2, self.c3]
+            TEMPdiag2:list[self.str] = [self.a3, self.b2, self.c1]
+            TEMPtodas:list[list[str]] = [TEMPfila, TEMPfilb, TEMPfilc, TEMPcol1, TEMPcol2, TEMPcol3, TEMPdiag1, TEMPdiag2]         
+            #asigna en el sistema paralelo
+            if posible == 'a1':
+                TEMPfila[0] = turn
+                TEMPcol1[0] = turn
+                TEMPdiag1[0] = turn
+            elif posible == 'a2':
+                TEMPfila[1] = turn
+                TEMPcol2[0] = turn
+            elif posible == 'a3':
+                TEMPfila[2] = turn
+                TEMPcol3[0] = turn
+                TEMPdiag2[0] = turn
+            elif posible == 'b1':
+                TEMPfilb[0] = turn
+                TEMPcol1[1] = turn
+            elif posible == 'b2':
+                TEMPfilb[1] = turn
+                TEMPcol2[1] = turn
+                TEMPdiag1[1] = turn
+                TEMPdiag2[1] = turn
+            elif posible == 'b3':
+                TEMPfilb[2] = turn
+                TEMPcol3[1] = turn
+            elif posible == 'c1':
+                TEMPfilc[0] = turn
+                TEMPcol1[2] = turn
+                TEMPdiag2[2] = turn
+            elif posible == 'c2':
+                TEMPfilc[1] = turn
+                TEMPcol2[2] = turn
+            elif posible == 'c3':
+                TEMPfilc[2] = turn
+                TEMPcol3[2] = turn
+                TEMPdiag1[2] = turn
 
-        if count_x_double_2 == 2 and len(set(self.DOUBLE2)) == 2 and '-' in self.DOUBLE2:
-            choice:str = list(set(self.disponibles) & set(self.double2))
-            self.assign(random.choice(choice))
-            return False
-        
-        if count_x_double_3 == 2 and len(set(self.DOUBLE3)) == 2 and '-' in self.DOUBLE3:
-            choice:str = list(set(self.disponibles) & set(self.double3))
-            self.assign(random.choice(choice))
-            return False
+            counter_linea:int = 0
+            necesita2:int = 0
+            for linea in TEMPtodas:  # si hay double lo juega, para defender y atacar
+                cantidad_de_space:int = 0
+                # print(necesita2)
 
-        if count_x_double_4 == 2 and len(set(self.DOUBLE4)) == 2 and '-' in self.DOUBLE4:
-            choice:str = list(set(self.disponibles) & set(self.double4))
-            self.assign(random.choice(choice))
-            return False
+                if len(set(linea)) == 2: #busca las lineas con dos iguales y un vacio
+                    for coord in linea:               
+                        if coord == '-':
+                            cantidad_de_space += 1
+                    if  cantidad_de_space == 1:
+                        necesita2 +=1
+                    if necesita2 == 2:
+                        # print(necesita2)
+                        self.assign(posible)
+                        return False
+                counter_linea += 1
 
         return True
     def HardDefend(self) -> None:
@@ -643,6 +672,8 @@ class Tic:
                 eleccion = random.choice(list(set(self.disponibles) - set(self.corners))) #cross
             else:
                 eleccion = random.choice(list(set(self.disponibles) & set(self.corners))) #cornes
+            if eleccion not in self.disponibles:
+                print("HardDefend", eleccion)
             self.assign(eleccion)
 
         else:
@@ -660,23 +691,27 @@ class Tic:
         elif self.counter == 2:
             if 'b2' in self.disponibles:
                 count:int = 0
-                for linea in self.square:
-                        
-                        if len(set(linea)) == 2 and 'o' not in linea:
-                            eleccion = list(set(self.squaredic[count])&set(self.disponibles)& set(self.corners))
-                            self.assign(eleccion[0])
-                            return
+                for linea in self.square:                     
+                    if len(set(linea)) == 2 and 'o' not in linea:
+                        ele = list(set(self.squaredic[count])&set(self.disponibles)& set(self.corners))
+                        eleccion = ele[0]
+                        self.assign(eleccion)
+                        return
+                    count += 1
 
-                        count += 1
-            else:
-                if self.a1 == 'x':
-                    self.assign('c3')
-                elif self.c1 == 'x':
-                    self.assign('a3')
-                elif self.c3 == 'x':
-                    self.assign('a1')
-                elif self.a3 == 'x':
-                        self.assign('c1')
+            else: #BEST PLAY = Draw/ B2 played in move 1
+                if self.a1 == 'x' and 'c3' in self.disponibles:
+                    eleccion = 'c3'
+                elif self.c1 == 'x' and 'a3' in self.disponibles:
+                    eleccion = 'a3'
+                elif self.c3 == 'x' and 'a1' in self.disponibles:
+                    eleccion = 'a1'
+                elif self.a3 == 'x' and 'c1' in self.disponibles:
+                    eleccion = 'c1'
+                else:
+                    eleccion = random.choice(self.corners)
+                
+            self.assign(eleccion)
                         
         elif self.counter == 4:
             if 'b2' in self.disponibles:
@@ -702,7 +737,7 @@ class Tic:
         elif self.counter == 1:
             self.HardDefend()
         else:
-            if self.ezwin():
+            if self.ezwin() and self.double_trouble():
             #solo entra si no tiene un movimiento que asegura victoria
                 if self.counter % 2 == 0:
                     self.HardAttack()
@@ -713,7 +748,10 @@ class Tic:
         if self.mode == 'PvP' or self.mode == 'PvCPU':
             self.window['-COL4-'].update(visible=True)
         else:
-            self.window['-COL4.5-'].update(visible=True)
+            if self.visi == 1:
+                self.window['-COL4.5-'].update(visible=True)
+            else:
+                self.window['-COL4.5-'].update(visible=False)
         self.juego(cantidad)
     def match_change(self) -> None:
         # asegura que siemrpre cambie quien empieza el match
@@ -813,6 +851,26 @@ class Tic:
      return [sg.Button(mode, key = str(mode), size=(15,1), font=("Helvetica",35))]
     def Name_select_layout(self): 
         
+        if self.mode == 'PvP':
+            self.window['j1'].update(visible = True)
+            self.window['name1'].update(visible = True)
+            self.window['j2'].update(visible = True)
+            self.window['name2'].update(visible = True)        
+        elif self.mode == 'PvCPU':
+            self.window['j1'].update(visible = True)
+            self.window['name1'].update(visible = True)
+            self.window['C0'].update(visible = True)
+            self.window["CPU2 Easy"].update(visible = True)
+            self.window["CPU2 Hard"].update(visible = True)
+        elif self.mode == 'CPUvCPU':
+            self.window['C1'].update(visible = True)
+            self.window["CPU1 Easy"].update(visible = True)
+            self.window["CPU1 Hard"].update(visible = True)
+            self.window['C2'].update(visible = True)
+            self.window["CPU2 Easy"].update(visible = True)
+            self.window["CPU2 Hard"].update(visible = True)
+
+
         while True:
             event, values = self.window.read()
 
@@ -859,6 +917,9 @@ class Tic:
                 self.jugador1Name = random.choice(['CPU 1 Easy','CPU 1 Hard'])
             if self.jugador2Name == '---':
                 self.jugador2Name = random.choice(['CPU 2 Easy','CPU 2 Hard'])
+
+        for x in self.XvX_list:
+            self.window[x].update(visible=False)
         self.window['-COL2-'].update(visible=False)
         self.select_BestOf()
     def Menu(self) -> None:
