@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 import random
 from pathlib import Path
 import os
-import time
+
 
 
 
@@ -193,8 +193,8 @@ class Tic:
 
 
         self.layout = [[layout1, layout2, layout3, layout3_5,layout4, layout4_5, layout5, layout6]]
-        self.window = sg.Window('Tic-Tac-Toe', self.layout,margins=(300, 300), element_justification='center', finalize=True)
-        # self.window.maximize()
+        self.window = sg.Window('Tic-Tac-Toe', self.layout,margins=(100, 240), element_justification='center', finalize=True)
+        self.window.maximize()
 
         self.memwinner =[]
     def clear(self) -> None:
@@ -245,8 +245,8 @@ class Tic:
         self.mem5 = []  
 
         self.tat = 0
-
-        self.window['off'].set_tooltip('On by default') 
+        if self.EXIT == 0:
+            self.window['off'].set_tooltip('On by default') 
     def clear_board(self) -> None:     
         lista = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
         lsi = ['1a', '2a', '3a', '1b', '2b', '3b', '1c', '2c', '3c']
@@ -337,7 +337,15 @@ class Tic:
         #Aumenta el counter de cantidad de moviminetos
         #llama a cambiar_turno()
         if self.EXIT == 0:
-            if choice == 'ERROR':
+
+            event = 'temp'
+            if self.visi == 1:
+                event, values = self.window.read()
+            
+            if event == sg.WIN_CLOSED:
+                self.EXIT = 1
+            
+            if choice == 'ERROR': #DEBUGGING
                 print(self.counter,"ROTO")
                 print(self)
                 self.clear()
@@ -345,7 +353,7 @@ class Tic:
 
             if self.mode == 'PvCPU':
                 self.window[choice].update(self.turno)
-            if self.mode == 'CPUvCPU' and self.visi == 1:
+            if self.mode == 'CPUvCPU' and self.visi == 1 and self.EXIT == 0:
                 swap = choice[1] + choice[0]
                 self.window[swap].update(self.turno)
 
@@ -438,9 +446,9 @@ class Tic:
                 self.jugador1Points += 1.0
                 if len(self.memwinner) <5:
                     self.memwinner.append(self.jugador1Name)
-                if self.jugador1Name == "CPU 1 Easy":
-                    print("llora")
-                    print(self)
+                # if self.jugador1Name == "CPU 1 Easy": #debugging
+                #     print("llora")
+                #     print(self)
             else:
                 self.jugador2Points += 1.0
                 if len(self.memwinner) <5:                    
@@ -573,7 +581,7 @@ class Tic:
                 self.assign(defend[0])
                 return False
         return True
-    def double_trouble(self) -> bool:         
+    def double_trouble(self) -> bool:
     # Busca si hay un moviemto que genere dos mov distintos que ganen en el proximo turno y lo juega
     # Esto esta limitado a los posibles que pueden generar el AI, hay otros que no va a ver pero nunca estaria en 
     # una posicion para que pasen
@@ -641,8 +649,6 @@ class Tic:
             necesita2:int = 0
             for linea in TEMPtodas:  # si hay double lo juega, para defender y atacar
                 cantidad_de_space:int = 0
-                # print(necesita2)
-
                 if len(set(linea)) == 2: #busca las lineas con dos iguales y un vacio
                     for coord in linea:               
                         if coord == '-':
@@ -650,7 +656,6 @@ class Tic:
                     if  cantidad_de_space == 1:
                         necesita2 +=1
                     if necesita2 == 2:
-                        # print(necesita2)
                         self.assign(posible)
                         return False
                 counter_linea += 1
@@ -679,7 +684,6 @@ class Tic:
         else:
             self.easySelect()
     def HardAttack(self) -> None:
-
         eleccion:str = 'ERROR'
 
         if self.counter == 0:
@@ -796,7 +800,7 @@ class Tic:
                     elif self.turno1v1 == "CPU 1 Hard" or self.turno1v1 == "CPU 2 Hard":
                         self.hardSelect()
 
-                if self.mode == "CPUvCPU" and self.visi == 1:
+                if self.mode == "CPUvCPU" and self.visi == 1 and self.EXIT == 0:
                     self.window['NC1'].update('\n' + self.jugador1Name + ": " + str(self.jugador1Points))
                     self.window['NC2'].update(self.jugador2Name + ": " + str(self.jugador2Points))
                     self.wait()
@@ -810,43 +814,43 @@ class Tic:
         self.seguir(cantidad)
     def select_BestOf(self) -> None:
         help = ['1small', '3small', '5small', '1big', '11big' , '111big']
+        if self.EXIT == 0:
+            if self.mode == 'CPUvCPU':
+                self.window['-COL3.5-'].update(visible=True)
+            else:
+                self.window['-COL3-'].update(visible=True)
 
-        if self.mode == 'CPUvCPU':
-            self.window['-COL3.5-'].update(visible=True)
-        else:
-            self.window['-COL3-'].update(visible=True)
-                
-        while True:
-            event, values = self.window.read()
-            if event in help:
-                i=0
-                num =''
-                while event[i] in '135':                   
-                    num += event[i]
-                    i += 1
-                self.Bof(int(num))
-                break    
-            if event == "bc" or event == "bk":
-                self.window['-COL3.5-'].update(visible=False)
-                self.window['-COL3-'].update(visible=False)
-                self.window['-COL2-'].update(visible=True)
-                self.Name_select_layout()
-                break
-            if event == "GO" and self.mode == 'CPUvCPU':
-                if len(values['-IN-']) == 0:
-                    self.Bof(1)
-                else: 
-                    self.Bof(int(values['-IN-']))         
-            if event == 'off':
-                if self.visi == 0:
-                   self.visi = 1
-                   self.window['off'].set_tooltip('ON')  
-                else:
-                    self.visi = 0    
-                    self.window['off'].set_tooltip('OFF')   
-            if event == sg.WIN_CLOSED:
-                self.EXIT = 1
-                break        
+            while True:
+                event, values = self.window.read()
+                if event in help:
+                    i=0
+                    num =''
+                    while event[i] in '135':                   
+                        num += event[i]
+                        i += 1
+                    self.Bof(int(num))
+                    break    
+                if event == "bc" or event == "bk":
+                    self.window['-COL3.5-'].update(visible=False)
+                    self.window['-COL3-'].update(visible=False)
+                    self.window['-COL2-'].update(visible=True)
+                    self.Name_select_layout()
+                    break
+                if event == "GO" and self.mode == 'CPUvCPU':
+                    if len(values['-IN-']) == 0:
+                        self.Bof(1)
+                    else: 
+                        self.Bof(int(values['-IN-']))         
+                if event == 'off':
+                    if self.visi == 0:
+                       self.visi = 1
+                       self.window['off'].set_tooltip('ON')  
+                    else:
+                        self.visi = 0    
+                        self.window['off'].set_tooltip('OFF')   
+                if event == sg.WIN_CLOSED:
+                    self.EXIT = 1
+                    break        
     def button_mode(self,mode:str):
      return [sg.Button(mode, key = str(mode), size=(15,1), font=("Helvetica",35))]
     def Name_select_layout(self): 
@@ -988,6 +992,9 @@ class Tic:
         print('c', self.c1, self.c2, self.c3)
         return "-----------------------------------"
 
+
+
+
+
 tic = Tic()
 tic.Empezar()
-
