@@ -142,8 +142,9 @@ class Tic:
         self.layout_game = [text0_game]
         self.layout_game += [[self.button_game(f'{letter}{num}') for num in l5] for letter in letters_display]
         self.layout_game.append([sg.T(text1_game, font=("Helvetica",20), key = "game1")])
-        self.layout_game.append([sg.T(text2_game, font=("Helvetica",20), key = "game2")])
-    
+        self.layout_game.append([sg.T(text2_game, font=("Helvetica",20), key = "game2"),sg.Push(),sg.Button("Next", key = "NextGa",size=(7), font=("Helvetica",25), visible=False)])
+        
+
         Next_button_CPU = sg.Button("Next", key = "Next",size=(7), font=("Helvetica",25))
         Visi_off_CPU = sg.Button("Visualisation off", key = "offf",size=(13), font=("Helvetica",25))
         line_cpu = sg.Push(),Next_button_CPU,Visi_off_CPU,sg.Push()
@@ -155,6 +156,7 @@ class Tic:
         self.layout_game_CPU.append(names_CPU_1)
         self.layout_game_CPU.append(names_CPU_2)
         self.layout_game_CPU.append(line_cpu)
+        
 
         self.text1_continue = self.jugador1Name + ": " + str(self.jugador1Points)
         self.text2_continue = self.jugador2Name + ": " + str(self.jugador2Points)
@@ -254,10 +256,10 @@ class Tic:
         if self.EXIT == 0:
             if self.mode == 'CPUvCPU':
                 for x in lsi:
-                    self.window[x].update("")
+                    self.window[x].update("", button_color = ("#FFFFFF", "#283b5b"))
             else:
                 for x in lista:
-                    self.window[x].update("")
+                    self.window[x].update("", button_color = ("#FFFFFF", "#283b5b"))
     def saltear(self) -> list[list[str]]:
         i:int = 4
         while i>=0 and len(self.mems[i]) == 0:
@@ -337,13 +339,8 @@ class Tic:
         #asigna en las listas que usa el AI
         #Aumenta el counter de cantidad de moviminetos
         #llama a cambiar_turno()
-        if self.EXIT == 0:
+        while self.EXIT == 0:
 
-            event = 'temp'
-            
-            if event == sg.WIN_CLOSED:
-                self.EXIT = 1
-            
             if choice == 'ERROR': #DEBUGGING
                 print(self.counter,"ROTO")
                 print(self)
@@ -417,8 +414,9 @@ class Tic:
 
             self.cambiar_turno()
 
-        if self.mode == 'PvCPU' or self.mode == "PvP":
-            self.window[self.keytit].update("Turno de: " + self.turno1v1 + '('+ self.turno +')')
+            if self.mode == 'PvCPU' or self.mode == "PvP" and self.EXIT == 0:
+                self.window[self.keytit].update("Turno de: " + self.turno1v1 + '('+ self.turno +')')
+            break
     def seleccionar(self) -> None:
         while True:
             event, values = self.window.read()
@@ -808,9 +806,33 @@ class Tic:
                     self.window['NC1'].update('\n' + self.jugador1Name + ": " + str(self.jugador1Points))
                     self.window['NC2'].update(self.jugador2Name + ": " + str(self.jugador2Points))
                     self.wait()
+            self.colour()
+            if self.EXIT == 0 and (self.mode == "PvP" or self.mode == "PvCPU") :   
+                self.window['NextGa'].update(visible = True)
+                self.wait()
+                self.window['NextGa'].update(visible = False)
+            else:
+                self.wait()
             self.mucho()
         self.finish()
         self.seguir(cantidad)
+    def colour(self):
+        while self.EXIT == 0:
+            count = 0
+            res = []
+            for ls in self.todas:
+                    if (len(set(ls)) == 1 and ls[0] != '-'):
+                        res:list[str] = self.dicNumToLinea[count]
+                        break
+                    count += 1
+            if res != []:
+                for coord in res:
+                    if self.mode == 'CPUvCPU':
+                        a = coord[0]
+                        b = coord[1]
+                        coord = f'{b}{a}'
+                    self.window[coord].update(button_color = ('yellow','dodger blue'))
+            break
     def mucho(self):
         self.cambiar_turno()#para ganador
         self.ganador1v1()
@@ -979,7 +1001,8 @@ class Tic:
                 break
             if event == sg.WIN_CLOSED:
                 self.EXIT = 1
-            if event == "Next":
+                break
+            if event == "Next" or event == 'NextGa':
                 break
             if event == 'offf':
                 if self.visi == 0:
@@ -988,6 +1011,7 @@ class Tic:
                 else:
                     self.visi = 0    
                     self.window['offf'].set_tooltip('OFF')   
+                break
     def __repr__(self) -> str:
         
         print(' ', '1','2','3')
