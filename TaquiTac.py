@@ -5,8 +5,8 @@ import os
 
 
 
-
 class Tic:
+    
 
     def __init__(self) -> None:
         self.a1:str = '-'
@@ -150,7 +150,8 @@ class Tic:
         names_CPU_1 = [sg.T('', font=("Helvetica",10), key = "NC1")]
         names_CPU_2 = [sg.T('', font=("Helvetica",10), key = "NC2")]
         
-        self.layout_game_CPU = [[sg.Button('',size =(5,1), font=("Helvetica", 40), disabled_button_color = ("white"), key = x+y, disabled=True)for x in l5] for y in letters_display]
+        self.layout_game_CPU = [[sg.Push(),sg.T('', font=("Helvetica",20), key = 'TITLECPU'),sg.Push()]]
+        self.layout_game_CPU += [[sg.Button('',size =(5,1), font=("Helvetica", 40), disabled_button_color = ("white"), key = x+y, disabled=True)for x in l5] for y in letters_display]
         self.layout_game_CPU.append(names_CPU_1)
         self.layout_game_CPU.append(names_CPU_2)
         self.layout_game_CPU.append(line_cpu)
@@ -247,7 +248,7 @@ class Tic:
         self.tat = 0
         if self.EXIT == 0:
             self.window['off'].set_tooltip('On by default') 
-    def clear_board(self) -> None:     
+    def clear_board(self) -> None:   
         lista = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
         lsi = ['1a', '2a', '3a', '1b', '2b', '3b', '1c', '2c', '3c']
         if self.EXIT == 0:
@@ -339,8 +340,6 @@ class Tic:
         if self.EXIT == 0:
 
             event = 'temp'
-            if self.visi == 1:
-                event, values = self.window.read()
             
             if event == sg.WIN_CLOSED:
                 self.EXIT = 1
@@ -786,7 +785,12 @@ class Tic:
 
             if self.mode == "PvP" or self.mode == "PvCPU":
                 self.display_game()
-
+            else:
+                if self.turno1v1 == self.jugador1Name:
+                    text = f'{self.jugador1Name}: x\t{self.jugador2Name}: o'
+                else:
+                    text = f'{self.jugador1Name}: o\t{self.jugador2Name}: x'
+                self.window['TITLECPU'].update(text)
             while(self.analisis() and self.counter < 9 and self.EXIT == 0): 
                 
                 if self.mode == "PvP" or (self.mode == "PvCPU" and self.turno1v1 == self.jugador1Name):
@@ -804,14 +808,14 @@ class Tic:
                     self.window['NC1'].update('\n' + self.jugador1Name + ": " + str(self.jugador1Points))
                     self.window['NC2'].update(self.jugador2Name + ": " + str(self.jugador2Points))
                     self.wait()
-
-            self.cambiar_turno()#para ganador
-            self.ganador1v1()
-            self.clear()
-            self.clear_board()
-
+            self.mucho()
         self.finish()
         self.seguir(cantidad)
+    def mucho(self):
+        self.cambiar_turno()#para ganador
+        self.ganador1v1()
+        self.clear()
+        self.clear_board()
     def select_BestOf(self) -> None:
         help = ['1small', '3small', '5small', '1big', '11big' , '111big']
         if self.EXIT == 0:
@@ -991,6 +995,8 @@ class Tic:
         print('b', self.b1, self.b2, self.b3)
         print('c', self.c1, self.c2, self.c3)
         return "-----------------------------------"
+
+
 
 
 
